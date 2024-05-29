@@ -2,13 +2,13 @@ import { useState } from 'react'
 import './App.css'
 
 // tictactoe game 
-// players 
-// state of the game 
-// round mechanism 
-// check at the end of each turn
-// Style the game
 // Think about testing
 // which linter to use these days
+// TODO nice to have, bold the winning slots! 
+// TODO read another solution
+// TODO do the other guys pair exercises
+// TODO other todos
+// TODO history of moves
 
 type SlotState = 'X' | 'O' | ''
 
@@ -16,7 +16,6 @@ type X = 'X'
 type O = 'O'
 
 type Player = X | O
-type Winner = Player
 
 type GameOver = {
   winner: Player
@@ -31,8 +30,7 @@ const initial: BoardState = [['', '', ''], ['', '', ''], ['', '', '']]
 // TODO move these to init function and maybe test?
 const ROW_COORDS = initial.map((row, index) => row.map((_, i) => [index, i]))
 const colLength = initial[0].length;
-let i = 0; // TODO maybe a range function
-const COL_COORDS = [];
+const COL_COORDS: number[][][] = [];
 for (let i = 0; i <  colLength; i++) {
   COL_COORDS[i] = [] // TODO fix the type
   for(let rowIndex = 0; rowIndex < initial.length; rowIndex++) {
@@ -40,15 +38,15 @@ for (let i = 0; i <  colLength; i++) {
   }
 }
 
-console.log({ROW_COORDS})
-console.log({COL_COORDS})
-const DIAGONALS = []
-for (let i = 0; i < initial.length; i++) {
-  DIAGONALS.push([i, i])
-}
-console.log({DIAGONALS})
+const DIAGONALS: number[][][] = [[], []]
 
-// TODO maybe rename to something generic
+for (let i = 0, y = initial.length -1; i < initial.length; i++, y--) {
+  DIAGONALS[0].push([i, i]);
+  DIAGONALS[1].push([y, i]);
+}
+
+
+
 function checkSlots(slots: Array<SlotState>): GameState {
   // check if row is not 3 length
   if (slots.every((s) => s === 'X')) {
@@ -66,23 +64,18 @@ function checkSlots(slots: Array<SlotState>): GameState {
   }
 }
 // column and diagonal can be implemented using checkRow anyway 
-
 // TODO unit test this
 function checkGame(board: BoardState) {
-  // check rows
-  // check columns 
-  // check diagonals
-  const allThingsToCheck = ROW_COORDS.concat(COL_COORDS).concat([DIAGONALS])
-  console.log({allThingsToCheck})
+
+  const allThingsToCheck = ROW_COORDS.concat(COL_COORDS).concat(DIAGONALS)
   const slotsToCheck = allThingsToCheck.reduce((prev, current) => {
     const things = current.map(([x, y]) => {
       return board[x][y]
     })
     prev.push(things)
     return prev
-  }, [])
+  }, [] as SlotState[][])
 
-  console.log({slotsToCheck})
 
   const result = slotsToCheck.map((s) => checkSlots(s)).find((r) => r !== 'continue')
 
@@ -92,23 +85,22 @@ function checkGame(board: BoardState) {
 type BoardProps = {
   game: BoardState
   turn: Player 
-  click: (row: number, column: number, player: Player) => void // TODO how to disable click for already played tiles
+  click: (row: number, column: number, player: Player) => void 
   gameState: GameState
+  reset: () => void;
 }
 
 // TODO how to make it more nicer as in google's one
-// TODO fix the styling, make the board same width and height
-// TODO reset button somehow
-function TheBoard({ game, turn, click, gameState }: BoardProps) {
+function TheBoard({ game, turn, click, gameState, reset }: BoardProps) {
   return (
     <div>
-        <div>
+        <div className='h-72 w-72 flex flex-col'>
         {
           game.map((row, rowIndex) => {
             return (
-              <div key={rowIndex} className='flex'>{
+              <div key={rowIndex} className='flex grow'>{
                 row.map((s, columnIndex) => {
-                  return <div key={columnIndex} className='border border-white p-8' onClick={() => click(rowIndex, columnIndex, turn)}>{s}</div>
+                  return <div key={columnIndex} className='flex grow shrink-0 basis-0 items-center justify-center border border-white p-8' onClick={() => s === '' && click(rowIndex, columnIndex, turn)}>{s === '' ? '_' : s}</div>
                 })
                 }</div>
             )
@@ -118,8 +110,11 @@ function TheBoard({ game, turn, click, gameState }: BoardProps) {
       {gameState === 'continue' ? (
         <div>It is {turn}'s turn</div>
       ): (
-        <div>{gameState.winner} has won!</div>
+        <div>
+          <div>{gameState.winner} has won!</div>
+        </div>
       )} 
+      <button onClick={reset}>Reset</button>
     </div>
 
   )
@@ -140,7 +135,12 @@ function App() {
   const [turn, toggle] = useTurn('X') as [Player, (t: Player) => void] // TODO get this from the UI
 
   const result = checkGame(board)
-  console.log({result})
+
+  console.log({board})
+  
+  const handleReset = () => {
+    setBoard([['', '', ''], ['', '', ''], ['', '', '']]);
+  }
 
   return (
     <main className='flex flex-col items-center gap-4'>
@@ -151,7 +151,7 @@ function App() {
           return prev
         })
         toggle(player)
-      }} />
+      }} reset={handleReset} />
     </main>
   )
 }
