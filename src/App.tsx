@@ -20,7 +20,7 @@ type GameOver = {
 
 type GameState = "continue" | GameOver;
 
-type BoardState = Array<Array<SlotState>>;
+export type BoardState = Array<Array<SlotState>>;
 
 const initial: BoardState = [
   ["", "", ""],
@@ -28,23 +28,33 @@ const initial: BoardState = [
   ["", "", ""],
 ];
 
-// TODO move these to init function and maybe test?
-const ROW_COORDS = initial.map((row, index) => row.map((_, i) => [index, i]));
-const colLength = initial[0].length;
-const COL_COORDS: number[][][] = [];
-for (let i = 0; i < colLength; i++) {
-  COL_COORDS[i] = []; // TODO fix the type
-  for (let rowIndex = 0; rowIndex < initial.length; rowIndex++) {
-    COL_COORDS[i].push([rowIndex, i]);
+function initialiseGame() {
+  // TODO move these to init function and maybe test?
+  const ROW_COORDS = initial.map((row, index) => row.map((_, i) => [index, i]));
+  const colLength = initial[0].length;
+  const COL_COORDS: number[][][] = [];
+  for (let i = 0; i < colLength; i++) {
+    COL_COORDS[i] = []; // TODO fix the type
+    for (let rowIndex = 0; rowIndex < initial.length; rowIndex++) {
+      COL_COORDS[i].push([rowIndex, i]);
+    }
   }
+
+  const DIAGONALS: number[][][] = [[], []];
+
+  for (let i = 0, y = initial.length - 1; i < initial.length; i++, y--) {
+    DIAGONALS[0].push([i, i]);
+    DIAGONALS[1].push([y, i]);
+  }
+
+  return {
+    DIAGONALS,
+    ROW_COORDS,
+    COL_COORDS,
+  };
 }
 
-const DIAGONALS: number[][][] = [[], []];
-
-for (let i = 0, y = initial.length - 1; i < initial.length; i++, y--) {
-  DIAGONALS[0].push([i, i]);
-  DIAGONALS[1].push([y, i]);
-}
+const { DIAGONALS, COL_COORDS, ROW_COORDS } = initialiseGame();
 
 function checkSlots(slots: Array<SlotState>): GameState {
   // check if row is not 3 length
@@ -62,7 +72,7 @@ function checkSlots(slots: Array<SlotState>): GameState {
 }
 // column and diagonal can be implemented using checkRow anyway
 // TODO unit test this
-function checkGame(board: BoardState) {
+export function checkGame(board: BoardState) {
   const allThingsToCheck = ROW_COORDS.concat(COL_COORDS).concat(DIAGONALS);
   const slotsToCheck = allThingsToCheck.reduce((prev, current) => {
     const things = current.map(([x, y]) => {
