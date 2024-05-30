@@ -126,7 +126,7 @@ function TheBoard({ game, turn, click, gameState, reset }: BoardProps) {
         <div>It is {turn}'s turn</div>
       ) : (
         <div>
-          <div>{gameState.winner} has won!</div>
+          <div data-testid="winner">{gameState.winner} has won!</div>
         </div>
       )}
       <button onClick={reset}>Reset</button>
