@@ -2,9 +2,7 @@ import { useState } from "react";
 import "./App.css";
 
 // tictactoe game
-// Think about testing
 // TODO nice to have, bold the winning slots!
-// TODO do the other guys pair exercises
 // TODO history of moves
 
 type SlotState = "X" | "O" | "";
@@ -109,7 +107,7 @@ function TheBoard({ game, turn, click, gameState, reset }: BoardProps) {
                 return (
                   <div
                     key={columnIndex}
-                    className="flex grow shrink-0 basis-0 items-center justify-center border border-white p-8"
+                    className="flex grow shrink-0 basis-0 items-center justify-center border border-white p-4 font-bold text-lg"
                     onClick={() =>
                       s === "" && click(rowIndex, columnIndex, turn)
                     }
@@ -123,13 +121,17 @@ function TheBoard({ game, turn, click, gameState, reset }: BoardProps) {
         })}
       </div>
       {gameState === "continue" ? (
-        <div>It is {turn}'s turn</div>
+        <div className="text-lg p-4">It is {turn}'s turn</div>
       ) : (
         <div>
-          <div data-testid="winner">{gameState.winner} has won!</div>
+          <div className="text-2xl font-bold p-4" data-testid="winner">
+            {gameState.winner} has won!
+          </div>
         </div>
       )}
-      <button onClick={reset}>Reset</button>
+      <button className="border border-slate-500" onClick={reset}>
+        Reset
+      </button>
     </div>
   );
 }
